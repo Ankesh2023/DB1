@@ -1,0 +1,121 @@
+Problem statement 1. Consider following Bank database schema and solve given queries: Account(Acc_no, branch_name,balance) branch(branch_name,branch_city, assets) customer(cust_name,cust_street,cust_city) Depositor(cust_name,acc_no) Loan(loan_no,branch_name,amount) Borrower(cust_name,loan_no)
+Q.1 Create above tables with appropriate constraints like primary key, foreign key, not null etc. with suitable data
+
+
+CREATE TABLE branch(
+  	branch_name varchar(50) primary key,
+    branch_city varchar(50),
+    assests  number
+);
+
+CREATE TABLE account(
+	acc_no number primary key,
+branch_name varchar(50) references branch(branch_name) on delete set null,
+balance number(10,2)    
+);
+
+CREATE TABLE customer (
+  	cust_name varchar(50) primary key,
+    cust_city varchar(50),
+    cust_street varchar(50)
+);
+
+CREATE TABLE depositor(
+  	cust_name varchar(50) references customer(cust_name) on delete CASCADE,
+    acc_no number REFERENCES account(acc_no) on delete set null
+);
+
+CREATE TABLE loan (
+  	loan_no number primary key,
+    branch_name varchar(50) references branch(branch_name) on delete set null,
+    amount number(10,2)
+);
+CREATE TABLE borrower(
+    cust_name varchar(50) references customer(cust_name) on delete cascade,
+    loan_no number references loan(loan_no) on delete set null
+);
+
+
+select * from branch;
+-- Insert data into the branch table
+INSERT INTO branch (branch_name, branch_city, assests)
+VALUES ('Branch1', 'City1', 100000);
+INSERT INTO branch (branch_name, branch_city, assests)
+VALUES ('Branch2', 'City2', 150000);
+INSERT INTO branch (branch_name, branch_city, assests)
+VALUES ('Branch3', 'City3', 200000);
+
+select * from account;
+INSERT INTO account (acc_no, branch_name, balance) VALUES (1, 'Branch1', 5000.00);
+INSERT INTO account (acc_no, branch_name,balance) VALUES (2, 'Branch2', 7500.00);
+INSERT INTO account (acc_no, branch_name,balance) VALUES (3, 'Branch3', 10000.00);
+
+-- Insert data into the customer table
+SELECT * FROM customer;
+INSERT INTO customer (cust_name, cust_city, cust_street)
+VALUES ('Customer1', 'City1', 'Street1');
+INSERT INTO customer (cust_name, cust_city, cust_street)
+VALUES ('Customer2', 'City2', 'Street2');
+INSERT INTO customer (cust_name, cust_city, cust_street)
+VALUES ('Customer3', 'City3', 'Street3');
+
+
+-- Insert data into the depositor table
+select * from depositor;
+INSERT INTO depositor (cust_name, acc_no)
+VALUES ('Customer1', 1);
+INSERT INTO depositor (cust_name, acc_no)
+VALUES ('Customer2', 2);
+INSERT INTO depositor (cust_name, acc_no)
+VALUES ('Customer3', 3);
+
+-- Insert data into the loan table
+SELECT * FROM loan;
+INSERT INTO loan (loan_no, branch_name, amount)
+VALUES (1, 'Branch1', 5000.00);
+INSERT INTO loan (loan_no, branch_name, amount)
+VALUES (2, 'Branch2', 7500.00);
+INSERT INTO loan (loan_no, branch_name, amount)
+VALUES (3, 'Branch3', 10000.00);
+
+select * from borrower;
+INSERT INTO borrower (cust_name, loan_no)
+VALUES ('Customer1', 1);
+INSERT INTO borrower (cust_name, loan_no)
+VALUES ('Customer2', 2);
+INSERT INTO borrower (cust_name, loan_no)
+VALUES ('Customer3', 3);
+
+
+Q.2 Create synonym for customer table as cust.
+	create synonym cust for customer;
+
+Q.3 Add customer phone number in Customer table.
+	alter table customer add cust_phone number(10);
+
+Q.4 Delete phone number attribute from Customer table.
+	alter table customer drop column cust_phone;
+
+Q 5.Find the names of all branches in loan relation.
+	select distinct branch_name from loan;
+
+Q.6. Find all customers who have a loan from bank. Find their names,loan_no and loan amount.
+		select l.loan_no,l.amount,b.cust_name from loan l
+		join borrower b on l.loan_no = b.loan_no;
+
+Q.7. List all customers in alphabetical order who have loan from Akurdi branch.
+	select cust_name from borrower where loan_no in (SELECT loan_no from loan where branch_name ='Branch4') order by cust_name;
+
+Q.8. Find all customers who have an account or loan or both at bank.
+select cust_name from customer where cust_name in (select cust_name from depositor 
+		union 
+select cust_name from borrower);
+
+Q.9. Find average account balance at Akurdi branch.
+select avg(balance) from account where branch_name='Branch1';
+
+Q.10. Find no. of depositors at each branch. 
+select a.branch_name,count(d.acc_no) from account a  join depositor d on a.acc_no = d.acc_no group by a.branch_name;
+
+Q.11. Delete all tuples at every branch located in Nigdi.
+delete from branch where branch_city='Branch1;

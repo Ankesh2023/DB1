@@ -1,0 +1,55 @@
+ Problem statement 9.
+ Q 1. Write PL/SQL block using explicit cursor for following requirements:
+ College has decided to mark all those students detained (D) who are having attendance less than
+ 75%.
+ Whenever such update takes place, a record for the same is maintained in the D_Stud table.
+ create table stud21(roll number(4), att number(4), status varchar(1));
+ create table d_stud(roll number(4), att number(4));
+
+
+   -- Create stud21 table
+  CREATE TABLE stud21 (
+      roll NUMBER(4) PRIMARY KEY,
+      att NUMBER(4),
+      status VARCHAR(1)
+  );
+  
+    -- Create d_stud table
+    CREATE TABLE d_stud (
+        roll NUMBER(4) references stud21(roll) on delete cascade,
+        att NUMBER(4)
+    );
+  
+  -- Insert data into stud21 table
+  INSERT INTO stud21 (roll, att) VALUES (1, 80);
+  INSERT INTO stud21 (roll, att) VALUES (2, 70);
+  INSERT INTO stud21 (roll, att) VALUES (3, 60);
+  INSERT INTO stud21 (roll, att) VALUES (4, 55);
+  INSERT INTO stud21 (roll, att) VALUES (5, 45);
+  INSERT INTO stud21 (roll, att) VALUES (6, 35);
+  INSERT INTO stud21 (roll, att) VALUES (7, 25);
+
+
+
+
+SET SERVEROUTPUT ON;
+DECLARE
+    CURSOR erp IS SELECT roll, att FROM stud21 WHERE att < 75;
+    mroll stud21.roll%TYPE;
+    mat stud21.att%TYPE;
+BEGIN
+    OPEN erp;
+    IF erp%isopen THEN
+        LOOP
+            FETCH erp INTO mroll, mat;
+            EXIT WHEN erp%NOTFOUND;
+            INSERT INTO d_stud VALUES (mroll, mat);
+            UPDATE stud21 SET status = 'D' WHERE roll = mroll;
+        END LOOP;
+        CLOSE erp;
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No students found with attendance less than 75%.');
+END;
+/

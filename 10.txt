@@ -1,0 +1,44 @@
+create table clientmstr (
+    c_id number(10),
+    name varchar(20),
+    city varchar(20)
+);
+
+create table audit_trade(
+c_id number(10),
+name varchar(20),
+city varchar(20),
+operation varchar(10)
+);
+
+
+create or replace trigger clientTriggerRow
+after update or delete on clientmstr
+for each row
+begin
+if updating then
+insert into audit_trade values(:old.c_id, :old.name, :old.city, 'update');
+else
+insert into audit_trade values(:old.c_id, :old.name, :old.city, 'delete');
+end if;
+end;
+/
+
+insert into clientmstr values(1, 'Sitaram', 'Pune');
+insert into clientmstr values(2, 'prabin', 'Pune');
+insert into clientmstr values(3, 'Amit', 'Mumbai');
+insert into clientmstr values(4, 'Adiitya', 'Delhi');
+
+create or replace trigger clientTriggerStatement
+after update or delete on clientmstr
+begin
+if updating then
+insert into audit_trade values(-1,'','', 'update');
+else
+insert into audit_trade values(-1,'','', 'delete');
+end if;
+end;
+/
+
+ update clientmstr set city='Mumbai' where c_id = 4;
+ delete from clientmstr where c_id = 4;

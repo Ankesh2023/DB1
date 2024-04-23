@@ -1,0 +1,42 @@
+-- Create table Accounts
+CREATE TABLE Accounts (
+    Account_Number INT PRIMARY KEY,
+    Last_Transaction_Date DATE,
+    Status VARCHAR(10)
+);
+
+-- Insert sample data into Accounts table
+INSERT INTO Accounts (Account_Number, Last_Transaction_Date, Status) VALUES (1001, '2023-04-20', 'Inactive');
+INSERT INTO Accounts (Account_Number, Last_Transaction_Date, Status) VALUES (1002, '2024-04-20', 'Inactive');
+INSERT INTO Accounts (Account_Number, Last_Transaction_Date, Status) VALUES (1003, '2022-04-20', 'Active');
+INSERT INTO Accounts (Account_Number, Last_Transaction_Date, Status) VALUES (1004, '2023-03-20', 'Inactive');
+
+-- PL/SQL block to update status of inactive accounts
+DECLARE
+    -- Declare variables
+    v_count INT := 0;
+BEGIN
+    -- Open cursor to select inactive accounts
+    FOR account_rec IN (SELECT * FROM Accounts WHERE Last_Transaction_Date < SYSDATE - 365 AND Status = 'Inactive') LOOP
+        -- Update status to 'Active' for inactive accounts
+        UPDATE Accounts
+        SET Status = 'Active'
+        WHERE Account_Number = account_rec.Account_Number;
+        
+        -- Increment row count
+        v_count := v_count + 1;
+    END LOOP;
+    
+    -- Display message based on the number of rows affected
+    IF (v_count = 0) THEN
+        DBMS_OUTPUT.PUT_LINE('No inactive accounts found.');
+    ELSIF (v_count = 1) THEN
+        DBMS_OUTPUT.PUT_LINE('1 inactive account has been activated.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE(v_count || ' inactive accounts have been activated.');
+    END IF;
+    
+    -- Commit the transaction
+    COMMIT;
+END;
+/

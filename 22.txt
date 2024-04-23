@@ -1,0 +1,52 @@
+-- Create Account table
+CREATE TABLE AAccount (
+    ACCOUNT_NO NUMBER PRIMARY KEY,
+    ACCOUNT_NAME VARCHAR2(100),
+    BALANCE NUMBER
+);
+
+-- Insert some sample data into Account
+INSERT INTO AAccount  VALUES (1001, 'John Doe', 5000);
+INSERT INTO AAccount  VALUES (1002, 'Jane Smith', 7000);
+INSERT INTO AAccount  VALUES (1003, 'Michael Johnson', 3000);
+INSERT INTO AAccount  VALUES (1004, 'Emily Davis', 6000);
+
+
+
+-- Create function
+SET SERVEROUTPUT ON;
+CREATE OR REPLACE FUNCTION F_checkAccNO(
+    p_ACCOUNT_NO IN AAccount.ACCOUNT_NO%TYPE
+)
+RETURN NUMBER
+IS
+    v_count NUMBER;
+BEGIN
+    SELECT COUNT(*)
+    INTO v_count
+    FROM AAccount
+    WHERE ACCOUNT_NO = p_ACCOUNT_NO;
+
+    RETURN CASE WHEN v_count > 0 THEN 1 ELSE 0 END;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 0;
+    WHEN OTHERS THEN
+        RETURN -1; -- Error
+END;
+/
+DECLARE
+    v_account_no AAccount.ACCOUNT_NO%TYPE := &v_account_no; -- Sample account number
+    v_result NUMBER;
+BEGIN
+    v_result := F_checkAccNO(v_account_no);
+
+    IF v_result = 1 THEN
+        DBMS_OUTPUT.PUT_LINE('Account number ' || v_account_no || ' exists.');
+    ELSIF v_result = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('Account number ' || v_account_no || ' does not exist.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('An error occurred while checking the account number ' || v_account_no || '.');
+    END IF;
+END;
+/

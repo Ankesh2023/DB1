@@ -1,0 +1,31 @@
+Write PL/SQL code block that will merge the data available in the newly created table NEW_BRANCHES with the data available in the table BRANCH_MASTER. If the data in the first table already exists in the second table then data should be skipped.(parameterized cursor)
+
+DECLARE
+    CURSOR new_branches_cur IS
+        SELECT *
+        FROM NEW_BRANCHES;
+BEGIN
+    FOR new_branch_rec IN new_branches_cur LOOP
+        -- Checking if data already exists in BRANCH_MASTER
+        IF NOT EXISTS (SELECT 1 FROM BRANCH_MASTER WHERE branch_id = new_branch_rec.branch_id) THEN
+            -- Inserting data into BRANCH_MASTER
+            INSERT INTO BRANCH_MASTER (branch_id, branch_name, branch_location)
+            VALUES (new_branch_rec.branch_id, new_branch_rec.branch_name, new_branch_rec.branch_location);
+        ELSE
+            -- Skipping data if already exists
+            DBMS_OUTPUT.PUT_LINE('Data for branch ' || new_branch_rec.branch_id || ' already exists in BRANCH_MASTER. Skipping...');
+        END IF;
+    END LOOP;
+    
+    -- Committing the transaction
+    COMMIT;
+    
+    -- Displaying completion message
+    DBMS_OUTPUT.PUT_LINE('Data from NEW_BRANCHES merged into BRANCH_MASTER successfully.');
+EXCEPTION
+    WHEN OTHERS THEN
+        -- Handling exceptions
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+        ROLLBACK;
+END;
+/

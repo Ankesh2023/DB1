@@ -1,0 +1,104 @@
+-- Create Stud table
+CREATE TABLE stu (
+    Roll NUMBER PRIMARY KEY,
+    Att NUMBER,
+    Status VARCHAR2(2)
+);
+
+-- Insert some sample data into Stud
+INSERT INTO stu VALUES (1, 80, 'ND');
+  INSERT INTO stu VALUES  (2, 70, 'ND');
+  INSERT INTO stu VALUES  (3, 85, 'ND');
+  INSERT INTO stu VALUES  (4, 60, 'ND');
+
+-- Commit the insertions
+COMMIT;
+
+-- PL/SQL block to check attendance and update status
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_roll_number stu.Roll%TYPE;
+    v_attendance stu.Att%TYPE;
+    v_status stu.Status%TYPE;
+BEGIN
+    -- Prompting the user to enter roll number
+    v_roll_number := &Enter_Roll_Number;
+    
+    -- Fetching attendance of the entered roll number
+    SELECT Att, Status INTO v_attendance, v_status
+    FROM stu
+    WHERE Roll = v_roll_number;
+    
+    -- Checking attendance
+    IF v_attendance < 75 THEN
+        DBMS_OUTPUT.PUT_LINE('Term not granted');
+        v_status := 'D';
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Term granted');
+        v_status := 'ND';
+    END IF;
+    
+    -- Updating status in Stud table
+    UPDATE stu
+    SET Status = v_status
+    WHERE Roll = v_roll_number;
+    
+    COMMIT;
+    
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            DBMS_OUTPUT.PUT_LINE('Roll number not found.');
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('An error occurred.');
+            ROLLBACK;
+END;
+/
+
+
+b
+CREATE TABLE Accountt (
+    acc_no NUMBER PRIMARY KEY,
+    last_transaction_date DATE,
+    status VARCHAR2(10)
+);
+
+-- Insert some sample data into Account
+INSERT INTO Accountt VALUES(1, TO_DATE('2023-04-22', 'YYYY-MM-DD'), 'Active');
+  INSERT INTO Accountt VALUES  (2, TO_DATE('2023-03-15', 'YYYY-MM-DD'), 'Inactive');
+  INSERT INTO Accountt VALUES  (3, TO_DATE('2023-04-10', 'YYYY-MM-DD'), 'Inactive');
+  INSERT INTO Accountt VALUES  (4, TO_DATE('2022-12-28', 'YYYY-MM-DD'), 'Active');
+  INSERT INTO Accountt VALUES  (5, TO_DATE('2023-01-05', 'YYYY-MM-DD'), 'Inactive');
+   INSERT INTO Accountt VALUES (6, TO_DATE('2023-04-18', 'YYYY-MM-DD'), 'Inactive');
+
+-- Commit the insertions
+COMMIT;
+DECLARE
+    v_count NUMBER := 0;
+BEGIN
+    -- Update accounts that were marked as inactive for no transaction in the last 365 days
+    FOR acc IN (SELECT acc_no FROM AccountT WHERE status = 'Inactive' AND last_transaction_date < SYSDATE - 365) LOOP
+        UPDATE AccountT
+        SET status = 'Active'
+        WHERE acc_no = acc.acc_no;
+        
+        v_count := v_count + SQL%ROWCOUNT;
+    END LOOP;
+    
+    -- Display message
+    IF v_count = 0 THEN
+        DBMS_OUTPUT.PUT_LINE('No inactive accounts found with no transaction in the last 365 days.');
+    ELSIF v_count = 1 THEN
+        DBMS_OUTPUT.PUT_LINE('1 account has been activated.');
+    ELSE
+        DBMS_OUTPUT.PUT_LINE(v_count || ' accounts have been activated.');
+    END IF;
+    
+    COMMIT;
+    
+    EXCEPTION
+        WHEN OTHERS THEN
+            DBMS_OUTPUT.PUT_LINE('An error occurred.');
+            ROLLBACK;
+END;
+/

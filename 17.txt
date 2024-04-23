@@ -1,0 +1,41 @@
+17dedcut
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_account_number   VARCHAR2(20);
+    v_balance          NUMBER;
+    v_min_balance      NUMBER := 1000; -- Minimum balance
+BEGIN
+    -- Accept account number from the user
+    v_account_number := '&account_number';
+
+    -- Fetch balance for the given account number
+    SELECT balance INTO v_balance
+    FROM accounts
+    WHERE account_number = v_account_number;
+
+    -- Check if the balance is less than the minimum balance
+    IF v_balance < v_min_balance THEN
+        -- Deduct Rs.100 from the balance
+        UPDATE accounts
+        SET balance = balance - 100
+        WHERE account_number = v_account_number;
+
+        -- Display the updated balance
+        DBMS_OUTPUT.PUT_LINE('Rs.100 deducted. Updated balance: Rs.' || (v_balance - 100));
+    ELSE
+        -- Display message if the balance is greater than or equal to the minimum balance
+        DBMS_OUTPUT.PUT_LINE('No need to deduct. Balance is within the limit.');
+    END IF;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Account number ' || v_account_number || ' not found.');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+CREATE TABLE accounts (
+    account_number VARCHAR2(20),
+    balance        NUMBER
+);

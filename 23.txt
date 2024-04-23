@@ -1,0 +1,47 @@
+CREATE TABLE CUSTOMERS (
+    customer_id INT PRIMARY KEY,
+    customer_name VARCHAR(100),
+    salary NUMBER
+);
+
+
+ column customer_name format a20
+ select * from customers;
+
+
+INSERT INTO CUSTOMERS (customer_id, customer_name, salary) VALUES (1, 'John Doe', 50000);
+INSERT INTO CUSTOMERS (customer_id, customer_name, salary) VALUES (2, 'Jane Smith', 60000);
+INSERT INTO CUSTOMERS (customer_id, customer_name, salary) VALUES (3, 'Alice Johnson', 70000);
+INSERT INTO CUSTOMERS (customer_id, customer_name, salary) VALUES (4, 'Bob Johnson', 55000);
+INSERT INTO CUSTOMERS (customer_id, customer_name, salary) VALUES (5, 'Mary Brown', 62000);
+INSERT INTO CUSTOMERS (customer_id, customer_name, salary) VALUES (6, 'Michael Lee', 58000);
+
+
+
+set serveroutput on
+CREATE OR REPLACE TRIGGER salary_diff_trigger
+BEFORE INSERT OR UPDATE OR DELETE ON Customers
+FOR EACH ROW
+DECLARE
+    v_old_salary NUMBER;
+    v_new_salary NUMBER;
+BEGIN
+    IF DELETING THEN
+        DBMS_OUTPUT.PUT_LINE('Old salary: ' || :OLD.salary);
+    ELSIF INSERTING THEN
+        DBMS_OUTPUT.PUT_LINE('New salary: ' || :NEW.salary);
+    ELSE
+        DBMS_OUTPUT.PUT_LINE('Old salary: ' || :OLD.salary);
+        DBMS_OUTPUT.PUT_LINE('New salary: ' || :NEW.salary);
+    END IF;
+END;
+/
+
+
+UPDATE CUSTOMERS
+SET salary = 200
+WHERE customer_id = 5;
+
+
+
+INSERT INTO CUSTOMERS (customer_id, customer_name, salary) VALUES (8, 'John Doe', 50000);

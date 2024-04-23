@@ -1,0 +1,59 @@
+Problem statement 5.
+ a)
+ Consider following  database schema and solve given queries
+ cust_mstr(cust_no,fname,lname)
+ add_dets(code_no,add1,add2,state,city,pincode)
+ Create above Tables with suitable data
+  CREATE TABLE cust_mstr (
+    cust_no INT PRIMARY KEY,
+    fname VARCHAR(50),
+    lname VARCHAR(50)
+);
+
+CREATE TABLE add_dets (
+    code_no INT PRIMARY KEY,
+    add1 VARCHAR(255),
+    add2 VARCHAR(255),
+    state VARCHAR(50),
+    city VARCHAR(50),
+    pincode INT
+);
+
+INSERT INTO cust_mstr (cust_no, fname, lname) VALUES (1, 'John', 'Doe');
+INSERT INTO cust_mstr (cust_no, fname, lname) VALUES  (2, 'Jane', 'Smith');
+INSERT INTO cust_mstr (cust_no, fname, lname) VALUES  (3, 'Alice', 'Johnson');
+
+INSERT INTO add_dets (code_no, add1, add2, state, city, pincode) VALUES
+(1, '123 Main St', '', 'CA', 'Los Angeles', 90001);
+
+INSERT INTO add_dets (code_no, add1, add2, state, city, pincode) VALUES
+(2, '456 Elm St', '', 'NY', 'New York', 10001);
+
+INSERT INTO add_dets (code_no, add1, add2, state, city, pincode) VALUES
+(3, '789 Oak St', '', 'TX', 'Houston', 77001);
+
+ 
+ Retrieve the address of customer Fname as 'xyz' and Lname as 'pqr'
+ 
+SELECT add1, add2, state, city, pincode
+FROM cust_mstr cm
+JOIN add_dets ad ON cm.cust_no = ad.code_no
+WHERE fname = 'John' AND lname = 'Doe';
+
+ Create View on add_dets table by selecting any two columns and perform insert update
+ delete operations
+
+ 
+CREATE VIEW add_dets_view AS
+SELECT code_no, add1
+FROM add_dets;
+
+-- Insert operation
+INSERT INTO add_dets_view (code_no, add1) VALUES (6, 'New Address 1');
+select * from add_dets_view;
+
+-- Update operation
+UPDATE add_dets_view SET add1 = 'Updated Address 2' WHERE add1 = 'New Address 1';
+
+-- Delete operation
+DELETE FROM add_dets_view WHERE add1 = 'Updated Address 2';

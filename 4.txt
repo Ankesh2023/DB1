@@ -1,0 +1,13 @@
+ List the customer holding fixed deposits of amount more than 5000
+SELECT c.custno, c.fname, c.lname, f.amt
+FROM cust_mstr c
+JOIN acc_fd_cust_dets a ON c.custno = a.codeno
+JOIN fd_dets f ON a.acc_fd_no = f.fd_sr_no
+WHERE f.amt > 5000;
+
+
+Create view on cust_mstr and acc_fd_cust_dets tables by selecting any one column
+from each table perform insert update delete operations
+CREATE  VIEW cust_acc_view AS
+SELECT cm.custno
+FROM cust_mstr cm;

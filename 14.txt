@@ -1,0 +1,71 @@
+14
+CREATE SEQUENCE Result_Seq
+  START WITH 1
+  INCREMENT BY 1
+  NOCACHE
+  NOCYCLE;
+
+-- Create Stud_Marks and Result tables
+CREATE TABLE Stud_Marks (
+    name VARCHAR2(100),
+    total_marks NUMBER
+);
+
+CREATE TABLE Result (
+    Roll NUMBER,
+    Name VARCHAR2(100),
+    Class VARCHAR2(100)
+);
+INSERT INTO Stud_Marks (name, total_marks) VALUES ('John', 1200);
+INSERT INTO Stud_Marks (name, total_marks) VALUES ('Jane', 1450);
+INSERT INTO Stud_Marks (name, total_marks) VALUES ('Michael', 1000);
+INSERT INTO Stud_Marks (name, total_marks) VALUES ('Emily', 850);
+  
+SETSERVEROUTPUT ON;
+CREATE OR REPLACE PROCEDURE proc_Grade(
+    p_name IN VARCHAR2,
+    p_total_marks IN NUMBER,
+    p_class OUT VARCHAR2
+)
+AS
+BEGIN
+    IF p_total_marks >= 990 AND p_total_marks <= 1500 THEN
+        p_class := 'Distinction';
+    ELSIF p_total_marks >= 900 AND p_total_marks <= 989 THEN
+        p_class := 'First Class';
+    ELSIF p_total_marks >= 825 AND p_total_marks <= 899 THEN
+        p_class := 'Higher Second Class';
+    ELSE
+        p_class := 'Fail';
+    END IF;
+END proc_Grade;
+/
+
+-- PL/SQL block
+SET SERVEROUTPUT ON;
+
+DECLARE
+    v_name Stud_Marks.name%TYPE;
+    v_total_marks Stud_Marks.total_marks%TYPE;
+    v_class Result.Class%TYPE;
+BEGIN
+    FOR rec IN (SELECT * FROM Stud_Marks) LOOP
+        v_name := rec.name;
+        v_total_marks := rec.total_marks;
+        
+        -- Call procedure proc_Grade
+        proc_Grade(v_name, v_total_marks, v_class);
+        
+        -- Insert result into Result table
+        INSERT INTO Result (Roll, Name, Class)
+        VALUES (Result_Seq.NEXTVAL, v_name, v_class);
+        
+        DBMS_OUTPUT.PUT_LINE('Student ' || v_name || ' classified as ' || v_class || '.');
+    END LOOP;
+    
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLCODE || ' - ' || SQLERRM);
+END;
+/

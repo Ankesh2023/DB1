@@ -1,0 +1,69 @@
+-- Create Account_Master table
+CREATE TABLE Account_Master (
+    ACCOUNT_NO NUMBER PRIMARY KEY,
+    CUSTOMER_NAME VARCHAR2(100),
+    INTRODUCER_NAME VARCHAR2(100)
+);
+
+-- Create Account_Master_Info table
+CREATE TABLE Account_Master_Info (
+    ACCOUNT_NO NUMBER PRIMARY KEY,
+    CUSTOMER_NAME VARCHAR2(100),
+    INTRODUCER_NAME VARCHAR2(100)
+);
+
+-- Insert some sample data into Account_Master
+INSERT INTO Account_Master (ACCOUNT_NO, CUSTOMER_NAME, INTRODUCER_NAME) VALUES (1001, 'John Doe', 'Michael Smith');
+INSERT INTO Account_Master (ACCOUNT_NO, CUSTOMER_NAME, INTRODUCER_NAME) VALUES (1002, 'Jane Smith', 'Emily Davis');
+INSERT INTO Account_Master (ACCOUNT_NO, CUSTOMER_NAME, INTRODUCER_NAME) VALUES (1003, 'Michael Johnson', 'John Doe');
+INSERT INTO Account_Master (ACCOUNT_NO, CUSTOMER_NAME, INTRODUCER_NAME) VALUES (1004, 'Emily Davis', 'Jane Smith');
+
+
+
+-- Create function
+SET SERVEROUTPUT ON;
+CREATE OR REPLACE FUNCTION F_checkAccNO(
+    p_ACCOUNT_NO IN Account_Master.ACCOUNT_NO%TYPE
+)
+RETURN NUMBER
+IS
+    v_count NUMBER;
+BEGIN
+    SELECT COUNT(*)
+    INTO v_count
+    FROM Account_Master
+    WHERE ACCOUNT_NO = p_ACCOUNT_NO;
+
+    RETURN CASE WHEN v_count > 0 THEN 1 ELSE 0 END;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 0;
+    WHEN OTHERS THEN
+        RETURN -1; -- Error
+END;
+/
+
+-- PL/SQL block
+DECLARE
+    v_account_no Account_Master.ACCOUNT_NO%TYPE := &Enter_Account_No;
+    v_customer_name Account_Master.CUSTOMER_NAME%TYPE;
+    v_introducer_name Account_Master.INTRODUCER_NAME%TYPE;
+BEGIN
+    IF F_checkAccNO(v_account_no) = 1 THEN
+        SELECT CUSTOMER_NAME, INTRODUCER_NAME
+        INTO v_customer_name, v_introducer_name
+        FROM Account_Master
+        WHERE ACCOUNT_NO = v_account_no;
+
+        INSERT INTO Account_Master_Info (ACCOUNT_NO, CUSTOMER_NAME, INTRODUCER_NAME)
+        VALUES (v_account_no, v_customer_name, v_introducer_name);
+
+        DBMS_OUTPUT.PUT_LINE('Record inserted into Account_Master_Info table successfully.');
+    ELSE
+        RAISE_APPLICATION_ERROR(-20002, 'Error: Account number ' || v_account_no || ' does not exist in Account_Master table.');
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLCODE || ' - ' || SQLERRM);
+END;
+/

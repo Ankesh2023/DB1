@@ -1,0 +1,88 @@
+a) Consider following database schema and solve given queries
+
+cust_mstr(cust_no,fname,lname)
+add_dets(code_no,add1,add2,state,city,pincode)
+1. Create above Tables with suitable data
+
+create table cust_mstr(
+cust_no number primary key,
+fname char(20),
+lname char(20));
+
+insert into cust_mstr values(101,'sitaram','patel');
+insert into cust_mstr values(102,'pravin','mahato');
+insert into cust_mstr values(103,'mandip','bhattarrai');
+
+create table add_dets(
+code_no number references cust_mstr(cust_no),
+add1 char(20),
+add2 char(20),
+state char(20),
+city char(20),
+pincode number);
+
+insert into add_dets values(101,'nigdi','pimpri','mh','pune',411044);
+insert into add_dets values(102,'pimpri','nigdi','mp','bhopal',411033);
+insert into add_dets values(103,'akrudi','nigdi','up','luknow',411022);
+
+2. Retrieve the address of customer Fname as 'xyz' and Lname as 'pqr'
+      
+SELECT ad.add1, ad.add2, ad.city, ad.state, ad.pincode
+FROM cust_mstr cm
+JOIN add_dets ad ON cm.cust_no = ad.code_no
+WHERE cm.fname = 'sitaram' AND cm.lname = 'patel';
+   
+3. Create View on add_dets table by selecting any two columns and perform insert
+update delete operations
+
+create view address_view as
+select add1,add2
+from add_dets;
+
+
+insert into address_view values('pune','mumbai');
+
+update  address_view set add1='birgunj'
+where add2='mumbai';
+
+select *from address_view;
+
+delete address_view where add2='mumbai';
+
+b) Create following Tables
+emp_mstr(e_mpno,f_name,l_name,m_name,dept,desg,branch_no)
+branch_mstr(name,b_no)
+
+CREATE TABLE emp_mstr (
+    emp_no INT PRIMARY KEY,
+    f_name VARCHAR(50),
+    l_name VARCHAR(50),
+    m_name VARCHAR(50),
+    dept VARCHAR(50),
+    desg VARCHAR(50),
+    branch_no INT   REFERENCES branch_mstr(branch_no)
+);
+
+INSERT INTO emp_mstr  VALUES(1001, 'sitaram', 'patel', 'prasad', 'Sales', 'Manager', 101);
+
+INSERT INTO emp_mstr  VALUES(1002, 'pravin', 'kumar', 'mahato', 'Sales', 'Assistant', 101);
+INSERT INTO emp_mstr  VALUES(1003, 'ranjit', 'choudary', 'nath', 'Sales', 'Assistant', 102);
+INSERT INTO emp_mstr  VALUES(1004, 'pawan', 'kumar', 'pandit', 'Reception', 'Receptionist', 102);
+INSERT INTO emp_mstr  VALUES(1005, 'rohan', 'kumar', 'yadav', 'Sales', 'Temp', 103);
+select *from emp_mstr;
+CREATE TABLE branch_mstr (
+    name VARCHAR(50),
+    branch_no INT PRIMARY KEY
+);
+
+INSERT INTO branch_mstr  VALUES ('pune', 101);
+
+INSERT INTO branch_mstr  VALUES ('pimpri', 102);
+INSERT INTO branch_mstr  VALUES ('nigdi', 103);
+select *from branch_mstr;
+
+List the employee details along with branch names to which they belong
+
+select e.f_name,e.l_name,e.m_name,e.emp_no,e.dept,e.desg,e.branch_no,b.name
+from  emp_mstr e
+join branch_mstr b on e.branch_no=b.branch_no;

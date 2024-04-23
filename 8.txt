@@ -1,0 +1,77 @@
+Problem statement 8.
+ Q 1.Borrower(Roll_no, Name, DateofIssue, NameofBook, Status)
+ Fine(Roll_no,Date,Amt)
+ 1.  Accept roll_no& name of book from user.
+ 2. Check the number of days (from date of issue), if days are between 15 to 30 then fine  amount
+ will be Rs 5per day.
+ 3.  If no. of days>30, per day fine will be Rs 50 per day & for days less than 30, Rs. 5 per day.
+ After submitting the book, status will change from I to R
+ 4. If condition of fine is true, then details will be stored into fine table.
+ 5. Also handles the exception by named exception handler or user define exception handler.
+
+    create table borrower(
+        roll_no number(10) primary key,
+        name varchar(20),
+        dates date,
+        book varchar(20),
+        status varchar(5) default 'i'
+    );
+
+    create table fine(
+        roll_no number(10),
+        dates date,
+        amt number(10)
+    );
+
+    set serveroutput on
+
+    create or replace procedure calc_fine(roll in number, nameOfBook in varchar) is
+    fine_amt number(10);
+        days number(10);
+        doi date;
+        dor date := trunc(sysdate);
+
+    begin
+        select dates into doi from borrower where roll_no=roll and book = nameOfBook;
+        days := trunc(dor - doi);
+
+        if days > 30 then
+        fine_amt := 150 + (days-30)*50;
+        elsif days>15 and days<=30 then
+        fine_amt := (days-15)*5;
+        else
+        fine_amt := 0;
+        end if;
+        if fine_amt>0 then
+        dbms_output.put_line('Fine amount is: '||fine_amt);
+        update borrower set status = 'R' where roll_no = roll and book = nameOfBook;
+        insert into fine values(roll, sysdate, fine_amt);
+        else
+        dbms_output.put_line('No fine');
+        update borrower set status = 'R' where roll_no = roll and book = nameOfBook;
+
+        end if;
+    exception
+        when no_data_found then
+            dbms_output.put_line('Student not found');
+        when others then
+                dbms_output.put_line('An error occured');
+    end;
+    /
+
+
+
+    declare
+        roll number(10);
+        nameOfBook varchar(20);
+    begin
+        roll :=&roll;
+        nameOfBook := '&nameOfBook';
+        calc_fine(roll, nameOfBook);
+    end;
+
+    /
+
+    insert into borrower values(1, 'xyz', to_date('20-01-2024', 'DD-MM-YYYY'), 'dsa');
+    insert into borrower values(2, 'pqr', to_date('20-02-2024', 'DD-MM-YYYY'), 'ma');
+    insert into borrower values(3, 'abc', to_date('20-04-2024', 'DD-MM-YYYY'), 'dbms');

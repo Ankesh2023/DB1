@@ -1,0 +1,62 @@
+Problem statement 12.
+
+Q 1. Write an SQL code block these raise a user defined exception where business rule is voilated.
+BR for client_master table specifies when the value of bal_due field is less than 0 handle the
+exception.
+
+Q 2.Write a before trigger for Insert, update event considering following requirement:
+Emp(e_no, e_name, salary)
+I) Trigger action should be initiated when salary is tried to be inserted is less than Rs. 50,000/-
+II) Trigger action should be initiated when salary is tried to be updated for value less than Rs.
+50,000/-
+Action should be rejection of update or Insert operation by displaying appropriate error message.
+Also the new values expected to be inserted will be stored in new table.
+Tracking(e_no, salary).
+
+
+
+
+CREATE OR REPLACE PROCEDURE check_bal_due(p_bal_due client_master.bal_due%TYPE) AS
+    negative_balance EXCEPTION;
+BEGIN
+    IF p_bal_due < 0 THEN
+        RAISE negative_balance;
+    END IF;
+EXCEPTION
+    WHEN negative_balance THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Negative balance found. Business rule violated.');
+END;
+/
+
+
+
+
+BEGIN
+    check_bal_due(-100); -- Example call with negative balance
+END;
+/
+
+
+
+
+CREATE OR REPLACE TRIGGER check_salary_trigger
+BEFORE INSERT OR UPDATE OF salary ON emp
+FOR EACH ROW
+DECLARE
+    insufficient_salary EXCEPTION;
+BEGIN
+    IF :NEW.salary < 50000 THEN
+        RAISE insufficient_salary;
+    END IF;
+EXCEPTION
+    WHEN insufficient_salary THEN
+        -- Reject the operation and display appropriate error message
+        RAISE_APPLICATION_ERROR(-20001, 'Salary cannot be less than Rs. 50,000/-');
+END;
+/
+
+-- Creating the Tracking table
+CREATE TABLE Tracking (
+    e_no INT,
+    salary NUMBER
+);

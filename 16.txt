@@ -1,0 +1,160 @@
+Consider the relational database
+Supplier(Sid,Sname,address)
+Parts(Pid, Pname, Color)
+Catalog(sid,pid,cost)
+Q. Find name of all parts whose color is green.
+Q. Find names of suppliers who supply some red parts.
+Q. Find names of all parts whose cost is more than Rs25.
+
+CREATE TABLE Supplier (
+    Sid INT PRIMARY KEY,
+    Sname VARCHAR(50),
+    address VARCHAR(100)
+);
+
+CREATE TABLE Parts (
+    Pid INT PRIMARY KEY,
+    Pname VARCHAR(50),
+    Color VARCHAR(50)
+);
+
+CREATE TABLE Catalog (
+    Sid INT,
+    Pid INT,
+    cost DECIMAL(10, 2),
+    PRIMARY KEY (Sid, Pid),
+    FOREIGN KEY (Sid) REFERENCES Supplier(Sid),
+    FOREIGN KEY (Pid) REFERENCES Parts(Pid)
+);
+-- Insert data into Supplier table
+INSERT INTO Supplier (Sid, Sname, address) VALUES (1, 'Supplier1', 'Address1');
+INSERT INTO Supplier (Sid, Sname, address) VALUES (2, 'Supplier2', 'Address2');
+INSERT INTO Supplier (Sid, Sname, address) VALUES (3, 'Supplier3', 'Address3');
+
+-- Insert data into Parts table
+INSERT INTO Parts (Pid, Pname, Color) VALUES (101, 'Part1', 'Green');
+INSERT INTO Parts (Pid, Pname, Color) VALUES (102, 'Part2', 'Red');
+INSERT INTO Parts (Pid, Pname, Color) VALUES (103, 'Part3', 'Blue');
+
+-- Insert data into Catalog table
+INSERT INTO Catalog (Sid, Pid, cost) VALUES (1, 101, 20.00);
+INSERT INTO Catalog (Sid, Pid, cost) VALUES (2, 102, 30.00);
+INSERT INTO Catalog (Sid, Pid, cost) VALUES (3, 103, 25.00);
+
+
+Q. Find name of all parts whose color is green.
+	select pname from parts where color='Green';
+ Q. Find names of suppliers who supply some red parts.
+		select Sname from Supplier where Sid in (select sid from catalog where pid in (select pid from parts where color='Red'));
+ Q. Find names of all parts whose cost is more than Rs25.
+	select pname from parts where pid in (select pid from Catalog where cost>25);
+
+-- Create Person table
+CREATE TABLE Person (
+    pname VARCHAR(50),
+    street VARCHAR(100),
+    city VARCHAR(50),
+    earnings DECIMAL(10, 2),
+    PRIMARY KEY (pname)
+);
+
+-- Insert data into Person table
+INSERT INTO Person (pname, street, city, earnings) VALUES ('Amit', '123 Main St', 'Pune', 3500.00);
+INSERT INTO Person (pname, street, city, earnings) VALUES ('Rahul', '456 Elm St', 'Mumbai', 2800.00);
+INSERT INTO Person (pname, street, city, earnings) VALUES ('Sneha', '789 Oak St', 'Pune', 3200.00);
+INSERT INTO Person (pname, street, city, earnings) VALUES ('Priya', '321 Pine St', 'Delhi', 4000.00);
+
+-- Create Company table
+CREATE TABLE Company (
+    cname VARCHAR(50),
+    city VARCHAR(50),
+    PRIMARY KEY (cname)
+);
+
+-- Insert data into Company table
+INSERT INTO Company (cname, city) VALUES ('Idea', 'Pune');
+INSERT INTO Company (cname, city) VALUES ('XYZ', 'Mumbai');
+INSERT INTO Company (cname, city) VALUES ('ABC', 'Delhi');
+
+-- Create Manages table
+CREATE TABLE Manages (
+    pname VARCHAR(50),
+    mname VARCHAR(50),
+    PRIMARY KEY (pname, mname),
+    FOREIGN KEY (pname) REFERENCES Person(pname),
+    FOREIGN KEY (mname) REFERENCES Company(cname)
+);
+
+-- Insert data into Manages table
+INSERT INTO Manages (pname, mname) VALUES ('Amit', 'Idea');
+INSERT INTO Manages (pname, mname) VALUES ('Rahul', 'XYZ');
+INSERT INTO Manages (pname, mname) VALUES ('Sneha', 'Idea');
+INSERT INTO Manages (pname, mname) VALUES ('Priya', 'ABC');
+
+
+SELECT P.street, P.city
+FROM Person P
+JOIN Manages M ON P.pname = M.pname
+JOIN Company C ON M.mname = C.cname
+WHERE C.cname = 'Idea'
+AND P.city = 'Pune' and P.earnings>3000;
+
+
+-- Create Student table
+CREATE TABLE Student (
+    Rollno INT PRIMARY KEY,
+    name VARCHAR(50),
+    address VARCHAR(100)
+);
+
+-- Create Subject table
+CREATE TABLE Subject (
+    sub_code VARCHAR(10) PRIMARY KEY,
+    sub_name VARCHAR(50)
+);
+
+-- Create Marks table
+CREATE TABLE Marks (
+    Rollno INT,
+    sub_code VARCHAR(10),
+    marks DECIMAL(5, 2),
+    PRIMARY KEY (Rollno, sub_code),
+    FOREIGN KEY (Rollno) REFERENCES Student(Rollno),
+    FOREIGN KEY (sub_code) REFERENCES Subject(sub_code)
+);
+
+
+-- Insert data into Student table
+INSERT INTO Student (Rollno, name, address) VALUES (1, 'Alice', '123 Main St');
+INSERT INTO Student (Rollno, name, address) VALUES (2, 'Bob', '456 Elm St');
+INSERT INTO Student (Rollno, name, address) VALUES (3, 'Charlie', '789 Oak St');
+
+-- Insert data into Subject table
+INSERT INTO Subject (sub_code, sub_name) VALUES ('DBMS', 'Database Management System');
+INSERT INTO Subject (sub_code, sub_name) VALUES ('AI', 'Artificial Intelligence');
+INSERT INTO Subject (sub_code, sub_name) VALUES ('ML', 'Machine Learning');
+
+-- Insert data into Marks table
+INSERT INTO Marks (Rollno, sub_code, marks) VALUES (1, 'DBMS', 85.5);
+INSERT INTO Marks (Rollno, sub_code, marks) VALUES (1, 'AI', 78.0);
+INSERT INTO Marks (Rollno, sub_code, marks) VALUES (1, 'ML', 92.5);
+
+INSERT INTO Marks (Rollno, sub_code, marks) VALUES (2, 'DBMS', 65.0);
+INSERT INTO Marks (Rollno, sub_code, marks) VALUES (2, 'AI', 70.2);
+INSERT INTO Marks (Rollno, sub_code, marks) VALUES (2, 'ML', 68.8);
+
+INSERT INTO Marks (Rollno, sub_code, marks) VALUES (3, 'DBMS', 39.0);
+INSERT INTO Marks (Rollno, sub_code, marks) VALUES (3, 'AI', 45.5);
+INSERT INTO Marks (Rollno, sub_code, marks) VALUES (3, 'ML', 38.2);
+
+
+-- Q1. Find out average marks of each student along with the name of student.
+SELECT S.name, AVG(M.marks) AS average_marks
+FROM Student S
+JOIN Marks M ON S.Rollno = M.Rollno
+GROUP BY S.name;
+
+-- Q2. Find how many students have failed in the subject “DBMS”
+SELECT COUNT(*) AS failed_students
+FROM Marks
+WHERE sub_code = 'DBMS' AND marks < 40;
